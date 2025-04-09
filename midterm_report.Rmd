@@ -1,0 +1,237 @@
+---
+title: "Tables"
+author: "Carina Fu"
+date: "2025-04-08"
+output: html_document
+---
+
+```{r}
+# read in data
+library(readr)
+cdc_data <- read_csv("Downloads/NWSS_Public_SARS-CoV-2_Wastewater_Metric_Data_20250307.csv")
+```
+
+```{r}
+library(dplyr)
+
+cdc_data2021 <- cdc_data %>%
+  # Convert to Date class if needed
+  mutate(
+    date_start = as.Date(date_start),
+    date_end   = as.Date(date_end)
+  ) %>%
+  # Filter for 2021
+  filter(
+    date_start >= as.Date("2021-01-01"),
+    date_start <= as.Date("2021-12-31"),
+    date_end   >= as.Date("2021-01-01"),
+    date_end   <= as.Date("2021-12-31")
+  )
+
+library(readr)
+
+# Export the filtered data frame to CSV using the readr package
+write_csv(cdc_data2021, "filtered_data_2021.csv")
+```
+
+Make tables:
+
+```{r}
+library(dplyr)
+
+# Create summary table by sample_location
+table1 <- cdc_data2021 %>%
+  group_by(sample_location) %>%
+  summarize(
+    total_population_served = sum(population_served, na.rm = TRUE),
+    avg_ptc_15d = mean(ptc_15d, na.rm = TRUE),
+    avg_detect_prop_15d = mean(detect_prop_15d, na.rm = TRUE)
+  )
+
+# Display the summary table
+print(table1)
+
+```
+
+```{r}
+# Install/load packages if needed
+# install.packages("gtsummary")
+# install.packages("dplyr")
+# install.packages("gt")
+
+library(dplyr)
+library(gtsummary)
+library(gt)
+
+# Example: creating a Table 1 with gtsummary
+# Each unique sample_location gets its own column,
+# and each variable gets its own row.
+
+table_one <- cdc_data2021 %>%
+  # Tell tbl_summary which columns to include:
+  tbl_summary(
+    by       = sample_location,                 # The variable that defines the columns
+    include  = c(population_served, ptc_15d, detect_prop_15d),
+    # Customize how summary stats are displayed:
+    statistic = list(
+      population_served ~ "{sum}",             # Summation for total population served
+      all_continuous()   ~ "{mean} ({sd})"     # Mean (SD) for other continuous vars
+    ),
+    # Rename columns in the final table:
+    label = list(
+      population_served   = "Total Population Served",
+      ptc_15d             = "Percent Change (ptc_15d)",
+      detect_prop_15d     = "Proportion Detected"
+    ),
+    # Control the number of digits for continuous stats:
+    digits = all_continuous() ~ 2
+  ) %>%
+  # Give a spanning header to the location columns:
+  modify_spanning_header(
+    all_stat_cols() ~ "**Sample Locations**"
+  ) %>%
+  # Add an "Overall" column:
+  add_overall()
+
+# Convert the gtsummary object into a gt table
+table_one_gt <- as_gt(table_one)
+
+# Print or view the gt table
+table_one_gt
+
+```
+
+```{r}
+# Count the occurrences of each unique state in wwtp_jurisdiction and select the top 5
+top5_states_frequency <- cdc_data2021 %>%
+  count(wwtp_jurisdiction, sort = TRUE) %>%  # count occurrences and sort descending
+  slice_head(n = 5)                         # take the top 5
+
+# Print the frequency table of the top 5 states
+print(top5_states_frequency)
+
+# Group the data by wwtp_jurisdiction (assumed to be state)
+table2 <- cdc_data2021 %>%
+  group_by(wwtp_jurisdiction) %>%
+  summarize(
+    total_population_served = sum(population_served, na.rm = TRUE),
+    median_ptc_15d = median(ptc_15d, na.rm = TRUE),
+    median_detect_prop_15d = median(detect_prop_15d, na.rm = TRUE),
+    median_percentile = median(percentile, na.rm = TRUE)
+  ) %>%
+  arrange(desc(total_population_served)) %>%  # Rank states: highest total population served first
+  slice_head(n = 5) %>%                         # Keep only the top 5 states
+  select(wwtp_jurisdiction, median_ptc_15d, median_detect_prop_15d, median_percentile)
+
+# Print Table 2
+print(table2)
+
+
+```
+
+```{r}
+# ─────────────────────────────────────────────
+# 1. Load libraries
+# ─────────────────────────────────────────────
+library(dplyr)       # for data manipulation
+library(gtsummary)   # for gtsummary tables
+library(gt)          # for converting to a gt table (optional final formatting)
+
+# ─────────────────────────────────────────────
+# 2. Identify the top 5 states by total population served
+# ─────────────────────────────────────────────
+top5_states <- cdc_data2021 %>%
+  group_by(wwtp_jurisdiction) %>%
+  summarize(total_population_served = sum(population_served, na.rm = TRUE)) %>%
+  arrange(desc(total_population_served)) %>%
+  slice_head(n = 5) %>%
+  pull(wwtp_jurisdiction)
+
+# ─────────────────────────────────────────────
+# 3. Filter your data to only those top 5 states
+# ─────────────────────────────────────────────
+cdc_data2021_top5 <- cdc_data2021 %>%
+  filter(wwtp_jurisdiction %in% top5_states)
+
+# ─────────────────────────────────────────────
+# 4. Create the gtsummary table (Table 2)
+#    - "by" = wwtp_jurisdiction makes each state a separate column
+# ─────────────────────────────────────────────
+table2 <- cdc_data2021_top5 %>%
+  select(wwtp_jurisdiction, ptc_15d, detect_prop_15d, percentile) %>%
+  tbl_summary(
+    by = wwtp_jurisdiction,  # each unique state becomes a column
+    label = list(
+      ptc_15d          ~ "Median % Change (ptc_15d)",
+      detect_prop_15d  ~ "Median Proportion Detected (detect_prop_15d)",
+      percentile       ~ "Median Virus Levels Change (percentile)"
+    ),
+    statistic = all_continuous() ~ "{median} ({p25}, {p75})",  # show median + IQR
+    digits = all_continuous() ~ 2  # format numeric results to 2 decimal places
+  ) %>%
+  modify_spanning_header(
+    all_stat_cols() ~ "**Top 5 States**"   # add a bold spanning header
+  ) %>%
+  add_overall()  # optional: adds an Overall column
+
+# ─────────────────────────────────────────────
+# 5. Convert the gtsummary object to a gt table
+# ─────────────────────────────────────────────
+table2_gt <- as_gt(table2)
+
+# Display or print the final table
+table2_gt
+
+```
+
+```{r}
+# ─────────────────────────────────────────────
+# 1. Load required packages
+# ─────────────────────────────────────────────
+library(dplyr)
+library(readr)
+
+# (Assuming you have already loaded your top five dataset called cdc_data2021_top5)
+# For example:
+# cdc_data2021_top5 <- read_csv("filtered_data_2021_top5.csv")
+
+# ─────────────────────────────────────────────
+# 2. Identify the top state (highest total population served) from cdc_data2021_top5
+# ─────────────────────────────────────────────
+top_state <- cdc_data2021_top5 %>%
+  group_by(wwtp_jurisdiction) %>%
+  summarize(total_population_served = sum(population_served, na.rm = TRUE)) %>%
+  arrange(desc(total_population_served)) %>%
+  slice_head(n = 1) %>%
+  pull(wwtp_jurisdiction)
+
+# (Optional) Print the top state name to verify
+print(paste("Top state by total population served:", top_state))
+
+# ─────────────────────────────────────────────
+# 3. Filter the dataset to only include observations for the top state
+# ─────────────────────────────────────────────
+top_state_data <- cdc_data2021_top5 %>%
+  filter(wwtp_jurisdiction == top_state)
+
+# ─────────────────────────────────────────────
+# 4. Create Table 3: Summarize data by county (using county_names)
+#    - Rows: Counties (ranked by total population served)
+#    - Columns: Median values for ptc_15d, detect_prop_15d, and percentile
+# ─────────────────────────────────────────────
+table3 <- top_state_data %>%
+  group_by(county_names) %>%
+  summarize(
+    total_population_served = sum(population_served, na.rm = TRUE),
+    median_ptc_15d = median(ptc_15d, na.rm = TRUE),
+    median_detect_prop_15d = median(detect_prop_15d, na.rm = TRUE),
+    median_percentile = median(percentile, na.rm = TRUE)
+  ) %>%
+  arrange(desc(total_population_served)) %>%  # Rank counties by total population served
+  select(county_names, median_ptc_15d, median_detect_prop_15d, median_percentile)
+
+# Display Table 3
+print(table3)
+
+```
+
