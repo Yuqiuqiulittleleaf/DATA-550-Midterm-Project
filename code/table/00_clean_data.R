@@ -3,6 +3,7 @@ here::i_am(
 )
 
 library(dplyr)
+library(readr)
 
 cdc_data2021 <- read_csv(here::here("data", "cdc_data.csv"))
 
