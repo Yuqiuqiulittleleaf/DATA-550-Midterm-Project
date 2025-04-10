@@ -18,9 +18,9 @@ data <- readRDS(
 ```
 
 
-Make tables:
+#Make tables:
 
-Table 1:
+#Table 1:
 ```{r echo=FALSE, out.width="100%", tabe1}
 # Load the table from the RDS file
 table1 <- readRDS("data/table1.rds")
@@ -28,7 +28,7 @@ table1 <- readRDS("data/table1.rds")
 # Display the table using knitr::kable() with 3 decimal places
 knitr::kable(table1, digits = 3)
 ```
-Table 2:
+#Table 2:
 
 ```{r}
 # Load the table from the RDS file
