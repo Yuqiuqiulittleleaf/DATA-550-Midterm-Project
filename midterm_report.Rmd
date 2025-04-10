@@ -1,0 +1,39 @@
+---
+title: "Midterm Report"
+author: "Angela Yu, Carina Fu, Yuchen Li"
+date: "2025-04-08"
+output: html_document
+---
+
+```{r}
+here::i_am(
+  "midterm_report.Rmd"
+)
+```
+
+```{r, load-data-and-label, include = FALSE}
+data <- readRDS(
+  file = here::here("data/cdc_data2021.rds")
+)
+```
+
+
+Make tables:
+
+Table 1:
+```{r echo=FALSE, out.width="100%", tabe1}
+# Load the table from the RDS file
+table1 <- readRDS("data/table1.rds")
+
+# Display the table using knitr::kable() with 3 decimal places
+knitr::kable(table1, digits = 3)
+```
+Table 2:
+
+```{r}
+# Load the table from the RDS file
+table2 <- readRDS("data/table2.rds")
+
+# Display the table using knitr::kable()
+knitr::kable(table2)
+```
