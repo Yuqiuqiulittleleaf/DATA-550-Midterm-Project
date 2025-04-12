@@ -1,5 +1,8 @@
 .NOTPARALLEL:
 
+install:
+	Rscript -e 'renv::restore()'
+
 Midterm_Project_Report.html: midterm_report.Rmd code/02_render_report.R
 	Rscript code/table/00_clean_data.R
 	Rscript code/table/01_make_tables.R
