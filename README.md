@@ -53,3 +53,14 @@ report correctly.
 
 The leader should fetch code from coders' repositories and make sure these code
 work locally, and merge all the pull requests.
+
+## Instructions
+
+Anyone who clone this project, should first check their installation of git lfs,
+for the data used here is over 100MB. If not, try code:
+brew install git-lfs
+git lfs install
+git lfs pull
+
+To synchronize the project environment, use:
+make install
