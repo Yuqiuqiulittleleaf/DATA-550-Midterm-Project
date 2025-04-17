@@ -67,17 +67,15 @@ population <- cdc_data2021 %>%
     detect_prop_15d >= 0 & detect_prop_15d <= 100
   ) %>%
   select(county_names, wwtp_jurisdiction, population_served) %>%
-  distinct() %>%  # 每个 (county, 州) 只保留一行
+  distinct() %>%  
   group_by(wwtp_jurisdiction) %>%
   summarize(total_population_served = sum(population_served, na.rm = TRUE)) %>%
   arrange(desc(total_population_served)) %>%
   slice(1:5)
 
-# 提取 Top 3 州的非缺失观测值
 top5_data <- cdc_data2021 %>%
   filter(wwtp_jurisdiction %in% population$wwtp_jurisdiction)
 
-# 输出各州 detect_prop_15d 概览（用于确认是否存在 IQR = 0 的情况）
 table2 <- top5_data %>%
   group_by(wwtp_jurisdiction) %>%
   summarize(
@@ -89,9 +87,8 @@ table2 <- top5_data %>%
     `IQR` = round(IQR(detect_prop_15d, na.rm = TRUE), 2),
     .groups = "drop"
   ) %>%
-  arrange(desc(`Median detection (%)`))  # 可改为 desc(IQR) 视你需求
+  arrange(desc(`Median detection (%)`)) 
 
-# 保存结果
 saveRDS(
   table2,
   file = here::here("data", "table2.rds")
