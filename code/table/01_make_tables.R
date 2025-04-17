@@ -60,36 +60,34 @@ county_summary <- cdc_data2021 %>%
   )
 
 # Step 2: Create a state-level summary.
-# For each state (wwtp_jurisdiction), sum the unique county population_served
-# and calculate the median of the remaining variables.
-state_summary <- county_summary %>%
+population <- cdc_data2021 %>%
+  filter(
+    !is.na(ptc_15d),
+    !is.na(detect_prop_15d),
+    detect_prop_15d >= 0 & detect_prop_15d <= 100
+  ) %>%
+  select(county_names, wwtp_jurisdiction, population_served) %>%
+  distinct() %>%  
+  group_by(wwtp_jurisdiction) %>%
+  summarize(total_population_served = sum(population_served, na.rm = TRUE)) %>%
+  arrange(desc(total_population_served)) %>%
+  slice(1:5)
+
+top5_data <- cdc_data2021 %>%
+  filter(wwtp_jurisdiction %in% population$wwtp_jurisdiction)
+
+table2 <- top5_data %>%
   group_by(wwtp_jurisdiction) %>%
   summarize(
-    total_population_served = sum(population_served, na.rm = TRUE),
-    median_ptc_15d = median(ptc_15d, na.rm = TRUE),
-    median_detect_prop_15d = median(detect_prop_15d, na.rm = TRUE),
-    median_percentile = median(percentile, na.rm = TRUE),
+    `Sample count` = n(),
+    `Mean detection (%)` = round(mean(detect_prop_15d, na.rm = TRUE), 2),
+    `Median detection (%)` = round(median(detect_prop_15d, na.rm = TRUE), 2),
+    `Q1 (25th percentile)` = round(quantile(detect_prop_15d, 0.25, na.rm = TRUE), 2),
+    `Q3 (75th percentile)` = round(quantile(detect_prop_15d, 0.75, na.rm = TRUE), 2),
+    `IQR` = round(IQR(detect_prop_15d, na.rm = TRUE), 2),
     .groups = "drop"
   ) %>%
-  # If total_population_served is too large (>1e6), take its natural log.
-  mutate(
-    total_population_served = if_else(total_population_served > 1e6,
-                                      log(total_population_served),
-                                      total_population_served)
-  ) %>%
-  # Round all numeric values to two decimal places.
-  mutate(
-    total_population_served = round(total_population_served, 2),
-    median_ptc_15d = round(median_ptc_15d, 2),
-    median_detect_prop_15d = round(median_detect_prop_15d, 2),
-    median_percentile = round(median_percentile, 2)
-  )
-
-# Step 3: Extract the top 5 states based on total_population_served.
-table2 <- state_summary %>%
-  arrange(desc(total_population_served)) %>%
-  slice_head(n = 5) %>%
-  select(wwtp_jurisdiction, median_ptc_15d, median_detect_prop_15d, median_percentile)
+  arrange(desc(`Median detection (%)`)) 
 
 saveRDS(
   table2,
