@@ -39,7 +39,6 @@ summary_stats <- top5_data %>%
     q3 = quantile(detect_prop_15d, 0.75, na.rm = TRUE),
     iqr = IQR(detect_prop_15d, na.rm = TRUE)
   )
-print(summary_stats)
 
 # ----------- Boxplot 1: detect_prop_15d -------------
 plot1 <- ggplot(top5_data, aes(x = wwtp_jurisdiction, y = detect_prop_15d)) +
@@ -51,7 +50,6 @@ plot1 <- ggplot(top5_data, aes(x = wwtp_jurisdiction, y = detect_prop_15d)) +
     y = "detect_prop_15d"
   ) +
   theme_minimal()
-print(plot1)
 
 # ----------- Boxplot 2: ptc_15d with jitter points -------------
 plot2 <- ggplot(top5_data, aes(x = wwtp_jurisdiction, y = ptc_15d)) +
@@ -70,7 +68,6 @@ plot2 <- ggplot(top5_data, aes(x = wwtp_jurisdiction, y = ptc_15d)) +
     axis.text.x = element_text(angle = 30, hjust = 1),
     plot.title = element_text(hjust = 0.5)
   )
-print(plot2)
 
 # ----------- Save figures to output/figure folder -------------
 ggsave(here("output", "figure", "boxplot_ptc15d.png"), plot2, width = 6, height = 4)
