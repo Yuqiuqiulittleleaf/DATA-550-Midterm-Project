@@ -64,3 +64,7 @@ git lfs pull
 
 To synchronize the project environment, use:
 make install
+
+There is an alternative dataset provided in data/cdc_data2021_no_january.csv,
+which can be used to test the reproducibility. Generating ways see code/03_alternative_data.R.
+
