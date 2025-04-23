@@ -9,6 +9,7 @@ Midterm_Project_Report.html: midterm_report.Rmd code/02_render_report.R
 	Rscript code/figure/00_clean_data.R
 	Rscript code/figure/01_boxplot.R
 	Rscript code/figure/02_dotplot.R
+	Rscript code/02_render_report.R
 
 .PHONY: clean
 clean:
