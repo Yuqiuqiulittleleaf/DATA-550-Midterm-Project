@@ -107,6 +107,7 @@ Then, try to rerun make install.
 
 If it's still not working, which might happen sometimes, please directly run the 
 following command in your console and terminal.
+I strongly recommend you run as administrator at this point.
 ```console
 renv::restore()
 ```
