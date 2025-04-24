@@ -106,12 +106,12 @@ EOF
 Then, try to rerun make install.
 
 If it's still not working, which might happen sometimes, please directly run the 
-following command in your console.
+following command in your console and terminal.
 ```console
 renv::restore()
 ```
 ```bash
-make install
+make Midterm_Project_Report.html
 ```
 
 
