@@ -2,7 +2,7 @@
 
 ------------------------------------------------------------------------
 
-## Collaborative description
+# Collaborative description
 
 The leader is responsible for:
 
@@ -24,7 +24,7 @@ Submitting several pull requests to merge code into the central repository;
 
 Documenting code and output.
 
-## Implement description for Coders
+# Implement description for Coders
 
 Coders should fork and clone this repository.
 
@@ -45,7 +45,7 @@ like to include.
 PS: Coders can use different names for files as long as they are recognizable, 
 and are encourage to store code for different tables or plots in seperate files.
 
-## Implement description for Leader
+# Implement description for Leader
 
 The leader should display all the works from coders in "midterm_report.Rmd", and
 use make command to generate all needed data/tables/plots, and render the html
@@ -54,16 +54,66 @@ report correctly.
 The leader should fetch code from coders' repositories and make sure these code
 work locally, and merge all the pull requests.
 
-## Instructions
+# Instructions for users
 
-Anyone who clone this project, should first check their installation of git lfs,
-for the data used here is over 100MB. If not, try code:
+## How to Download the data
+If you want to clone this project to your local computer, you may first check
+your installation of git lfs, because the origin data file is over 100MB.
+After successfully cloning the project, the following code would be helpful to 
+recover the dataset.
+```bash
 brew install git-lfs
 git lfs install
 git lfs pull
+```
+
+---
+## How to generate the report
+
+The following command should synchronize the project environment,
+and generate the report. If you meet any problem, please see the next section.
+```bash
+make
+```
+
+---
+## How to synchronize the environment
 
 To synchronize the project environment, use:
+```bash
 make install
+```
+This command has been tested on a Mac computer, so it should work and the environment
+will be built very quickly.
+
+However, if you receive any errors that corresponds to the package "Matrix",
+please try the following command:
+```bash
+brew install gcc
+which gfortran
+```
+
+The second command will return the correct path to your Fortran compiler. Please 
+copy it and use it to replace /opt/homebrew/bin/gfortran in the configuration.
+```bash
+cat <<EOF > ~/.R/Makevars
+FC = /opt/homebrew/bin/gfortran
+F77 = /opt/homebrew/bin/gfortran
+FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/\$(/opt/homebrew/bin/gfortran -dumpversion | cut -d. -f1) -lgfortran -lquadmath -lm
+EOF
+```
+
+Then, try to rerun make install.
+
+If it's still not working, which might happen sometimes, please directly run the 
+following command in your console.
+```console
+renv::restore()
+```
+```bash
+make install
+```
+
 
 There is an alternative dataset provided in data/cdc_data2021_no_january.csv,
 which can be used to test the reproducibility. Generating ways see code/03_alternative_data.R.
