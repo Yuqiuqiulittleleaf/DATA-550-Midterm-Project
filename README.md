@@ -68,15 +68,6 @@ git lfs pull
 ```
 
 ---
-## How to generate the report
-
-The following command should synchronize the project environment,
-and generate the report. If you meet any problem, please see the next section.
-```bash
-make
-```
-
----
 ## How to synchronize the environment
 
 To synchronize the project environment, use:
@@ -96,6 +87,8 @@ which gfortran
 The second command will return the correct path to your Fortran compiler. Please 
 copy it and use it to replace /opt/homebrew/bin/gfortran in the configuration.
 ```bash
+mkdir -p ~/.R
+
 cat <<EOF > ~/.R/Makevars
 FC = /opt/homebrew/bin/gfortran
 F77 = /opt/homebrew/bin/gfortran
@@ -104,6 +97,21 @@ EOF
 ```
 
 Then, try to rerun make install.
+
+If failed, please follow the instructions here again.
+```bash
+/opt/homebrew/bin/gfortran -dumpversion
+```
+This command will give you a version of your gfortran. Usually it's 13 or 14.
+Please 
+copy it and use it to replace 14 in the configuration.
+```bash
+cat <<EOF > ~/.R/Makevars
+FC = /opt/homebrew/bin/gfortran
+F77 = /opt/homebrew/bin/gfortran
+FLIBS = -L/opt/homebrew/opt/gcc/lib/gcc/14 -lgfortran -lquadmath -lm
+EOF
+```
 
 If it's still not working, which might happen sometimes, please directly run the 
 following command in your console and terminal.
@@ -115,6 +123,13 @@ renv::restore()
 make Midterm_Project_Report.html
 ```
 
+---
+## How to generate the report
+
+The following command should generate the report. 
+```bash
+make
+```
 
 There is an alternative dataset provided in data/cdc_data2021_no_january.csv,
 which can be used to test the reproducibility. Generating ways see code/03_alternative_data.R.
